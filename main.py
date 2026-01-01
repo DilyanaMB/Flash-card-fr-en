@@ -4,30 +4,33 @@ import random
 import time
 
 BACKGROUND_COLOR = "#B1DDC6"
-
-data = pandas.read_csv("data/french_words.csv")
-to_learn = data.to_dict(orient="records")
 current_card = {}
+to_learn = {}
+
+try:
+    data = pandas.read_csv("data/words_to_learn.csv")
+except FileNotFoundError:
+    original_data = pandas.read_csv("data/french_words.csv")
+    to_learn = original_data.to_dict('records')
+else:
+    to_learn = data.to_dict(orient="records")
 
 
 def next_card():
     global current_card, flip_timer
     window.after_cancel(flip_timer)
-    try:
-        data_left = pandas.read_csv("data/words_to_learn.csv")
-        left_to_learn = data_left.to_dict(orient="records")
-    except FileNotFoundError:
-        file = open('data/words_to_learn.csv', 'w')
-        current_card = random.choice(to_learn)
-        to_learn.remove(current_card)
-        file.write(current_card)
-    else:
-        current_card = random.choice(left_to_learn)
-    finally:
-        canvas.itemconfig(card_title, text='French', fill='black')
-        canvas.itemconfig(card_word, text=current_card['French'], fill='black')
-        canvas.itemconfig(card_background, image=card_front_image)
-        flip_timer=window.after(3000, func=flip_card)
+    current_card = random.choice(to_learn)
+    canvas.itemconfig(card_title, text='French', fill='black')
+    canvas.itemconfig(card_word, text=current_card['French'], fill='black')
+    canvas.itemconfig(card_background, image=card_front_image)
+    flip_timer = window.after(3000, func=flip_card)
+
+
+def is_known():
+    to_learn.remove(current_card)
+    data = pandas.DataFrame(to_learn)
+    data.to_csv("data/words_to_learn.csv", index=False)
+    next_card()
 
 
 def flip_card():
@@ -56,7 +59,7 @@ right_button = Button(image=right_image, bg=BACKGROUND_COLOR, highlightthickness
 right_button.grid(row=1, column=1)
 
 wrong_image = PhotoImage(file="images/wrong.png")
-wrong_button = Button(image=wrong_image, bg=BACKGROUND_COLOR, highlightthickness=0, command=next_card)
+wrong_button = Button(image=wrong_image, bg=BACKGROUND_COLOR, highlightthickness=0, command=is_known)
 wrong_button.grid(row=1, column=0)
 
 next_card()
