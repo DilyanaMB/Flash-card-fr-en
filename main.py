@@ -13,11 +13,21 @@ current_card = {}
 def next_card():
     global current_card, flip_timer
     window.after_cancel(flip_timer)
-    current_card = random.choice(to_learn)
-    canvas.itemconfig(card_title, text='French', fill='black')
-    canvas.itemconfig(card_word, text=current_card['French'], fill='black')
-    canvas.itemconfig(card_background, image=card_front_image)
-    flip_timer=window.after(3000, func=flip_card)
+    try:
+        data_left = pandas.read_csv("data/words_to_learn.csv")
+        left_to_learn = data_left.to_dict(orient="records")
+    except FileNotFoundError:
+        file = open('data/words_to_learn.csv', 'w')
+        current_card = random.choice(to_learn)
+        to_learn.remove(current_card)
+        file.write(current_card)
+    else:
+        current_card = random.choice(left_to_learn)
+    finally:
+        canvas.itemconfig(card_title, text='French', fill='black')
+        canvas.itemconfig(card_word, text=current_card['French'], fill='black')
+        canvas.itemconfig(card_background, image=card_front_image)
+        flip_timer=window.after(3000, func=flip_card)
 
 
 def flip_card():
