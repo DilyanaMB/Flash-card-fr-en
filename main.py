@@ -1,7 +1,6 @@
 from tkinter import *
 import pandas
 import random
-import time
 
 BACKGROUND_COLOR = "#B1DDC6"
 current_card = {}
@@ -26,18 +25,17 @@ def next_card():
     flip_timer = window.after(3000, func=flip_card)
 
 
-def is_known():
-    to_learn.remove(current_card)
-    data = pandas.DataFrame(to_learn)
-    data.to_csv("data/words_to_learn.csv", index=False)
-    next_card()
-
-
 def flip_card():
     canvas.itemconfig(card_title, text='English', fill='white')
     canvas.itemconfig(card_word, text=current_card['English'], fill='white')
     canvas.itemconfig(card_background, image=card_back_image)
 
+
+def is_known():
+    to_learn.remove(current_card)
+    data = pandas.DataFrame(to_learn)
+    data.to_csv("data/words_to_learn.csv", index=False)
+    next_card()
 
 window = Tk()
 window.title("Flash Cards")
@@ -54,13 +52,13 @@ card_word = canvas.create_text(400, 263, text="", font=('Arial', 60, 'bold'), fi
 canvas.config(bg=BACKGROUND_COLOR, highlightthickness=0)
 canvas.grid(row=0, column=0, columnspan=2)
 
-right_image = PhotoImage(file="images/right.png")
-right_button = Button(image=right_image, bg=BACKGROUND_COLOR, highlightthickness=0, command=next_card)
-right_button.grid(row=1, column=1)
+check_image = PhotoImage(file="images/right.png")
+known_button = Button(image=check_image, bg=BACKGROUND_COLOR, highlightthickness=0, command=is_known)
+known_button.grid(row=1, column=1)
 
-wrong_image = PhotoImage(file="images/wrong.png")
-wrong_button = Button(image=wrong_image, bg=BACKGROUND_COLOR, highlightthickness=0, command=is_known)
-wrong_button.grid(row=1, column=0)
+cross_image = PhotoImage(file="images/wrong.png")
+unknown_button = Button(image=cross_image, bg=BACKGROUND_COLOR, highlightthickness=0, command=next_card)
+unknown_button.grid(row=1, column=0)
 
 next_card()
 
